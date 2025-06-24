@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import type { Header, SortType } from 'vue3-easy-data-table';
-import { currenciesData } from '@/currencies';
 
 import Vue3EasyDataTable from 'vue3-easy-data-table';
 import Echo from 'laravel-echo';
@@ -17,15 +16,30 @@ const echo = new Echo({
 });
 
 const currencies = ref([]);
+const connectionState = ref<'connecting' | 'connected' | 'unavailable'>('connecting');
+const channelName = 'currency-updates';
+
+const isLoading = computed(() => connectionState.value !== 'connected' && currencies.value.length === 0);
 
 onMounted(() => {
-    echo.channel('currency-updates').listen('CurrencyDataUpdated', (event) => {
-        console.log(event);
-        currencies.value = event.currencyData;
+    echo.connector.pusher.connection.bind('state_change', (states: { previous: string, current: string }) => {
+        console.log('Connection state changed from', states.previous, 'to', states.current);
+        connectionState.value = states.current;
     });
+
+    echo.channel(channelName)
+        .listen('CurrencyDataUpdated', (event: { currencyData: [] }) => {
+            console.log('Currency Data Updated');
+            currencies.value = event.currencyData;
+        });
 });
 
-// --- Component Configuration ---
+onUnmounted(() => {
+    console.log(`Leaving channel: ${channelName}`);
+    echo.leave(channelName);
+    echo.connector.pusher.connection.unbind_all();
+});
+
 const headers: Header[] = [
     { text: 'Name', value: 'name' },
     { text: 'Current Price', value: 'current_price', sortable: true },
@@ -33,17 +47,12 @@ const headers: Header[] = [
     { text: '24h %', value: 'price_change_percentage_24h_in_currency', sortable: true },
     { text: '7d %', value: 'price_change_percentage_7d_in_currency', sortable: true },
     { text: 'Market Cap', value: 'market_cap', sortable: true },
-    { text: 'Circulating Supply', value: 'circulating_supply', sortable: true },
+    { text: 'Circulating Supply', value: 'circulating_supply', sortable: true }
 ];
 
-// Initial sort configuration for the data table
 const sortBy: string[] = [];
 const sortType: SortType[] = [];
 
-/**
- * Formats a large number into a human-readable string with a suffix (K, M, B, T).
- * @param value The number to format.
- */
 function formatLargeNumber(value: number): string {
     if (value >= 1e12) return `${(value / 1e12).toFixed(2)}T`;
     if (value >= 1e9) return `${(value / 1e9).toFixed(2)}B`;
@@ -52,20 +61,12 @@ function formatLargeNumber(value: number): string {
     return value.toString();
 }
 
-/**
- * Formats a percentage change, adding a directional arrow.
- * @param value The percentage change.
- */
-function formatChange(value: number): string {
+function formatPercentChange(value: number): string {
     const arrow = value >= 0 ? '▲' : '▼';
     return `${arrow} ${Math.abs(value).toFixed(2)}%`;
 }
 
-/**
- * Returns a CSS class based on whether the value is positive or negative.
- * @param value The number to check.
- */
-function getChangeClass(value: number): string {
+function getChangePercentClass(value: number): string {
     return value >= 0 ? 'text-green-400' : 'text-red-400';
 }
 </script>
@@ -73,18 +74,25 @@ function getChangeClass(value: number): string {
 <template>
     <div
         class="min-h-screen font-medium p-4 dark-mode">
+        <div v-if="connectionState !== 'connected'"
+             class="text-center p-4 mb-4 bg-yellow-800 bg-opacity-40 text-yellow-200 rounded-lg">
+            <p v-if="connectionState === 'connecting'">Connecting to real-time server...</p>
+            <p v-if="connectionState === 'unavailable'">Connection lost. Attempting to reconnect...</p>
+        </div>
         <Vue3EasyDataTable
             :headers="headers"
             :items="currencies"
             :sort-by="sortBy"
             :sort-type="sortType"
+            :loading="isLoading"
             buttons-pagination
             multi-sort
         >
-            <template #item-name="{ name, icon }"> <div class="flex items-center gap-3">
-                <img v-if="icon" :src="icon" alt="logo" class="w-6 h-6 rounded-full" />
-                <span>{{ name }}</span>
-            </div>
+            <template #item-name="{ name, icon }">
+                <div class="flex items-center gap-3">
+                    <img v-if="icon" :src="icon" alt="logo" class="w-6 h-6 rounded-full" />
+                    <span>{{ name }}</span>
+                </div>
             </template>
             <template #item-current_price="{ current_price }">
                 ${{ current_price.toLocaleString() }}
@@ -93,24 +101,24 @@ function getChangeClass(value: number): string {
                 $ {{ market_cap.toLocaleString() }}
             </template>
             <template #item-price_change_percentage_1h_in_currency="{ price_change_percentage_1h_in_currency: change }">
-                <div :class="getChangeClass(change)">
-                    {{ formatChange(change) }}
+                <div :class="getChangePercentClass(change)">
+                    {{ formatPercentChange(change) }}
                 </div>
             </template>
-            <template #item-price_change_percentage_24h_in_currency="{ price_change_percentage_24h_in_currency: change }">
-                <div :class="getChangeClass(change)">
-                    {{ formatChange(change) }}
+            <template
+                #item-price_change_percentage_24h_in_currency="{ price_change_percentage_24h_in_currency: change }">
+                <div :class="getChangePercentClass(change)">
+                    {{ formatPercentChange(change) }}
                 </div>
             </template>
             <template #item-price_change_percentage_7d_in_currency="{ price_change_percentage_7d_in_currency: change }">
-                <div :class="getChangeClass(change)">
-                    {{ formatChange(change) }}
+                <div :class="getChangePercentClass(change)">
+                    {{ formatPercentChange(change) }}
                 </div>
             </template>
             <template #item-circulating_supply="{ circulating_supply, symbol }">
                 {{ formatLargeNumber(circulating_supply) }} {{ symbol.toUpperCase() }}
             </template>
-
         </Vue3EasyDataTable>
     </div>
 </template>

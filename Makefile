@@ -1,25 +1,26 @@
-.PHONY: start
+.PHONY: start serve reverb dev stop
 
 start:
-	@echo "Starting all services in parallel..."
+	@echo "Starting Laravel server, Reverb, and Vite dev server..."
 	@$(MAKE) serve &
-	@$(MAKE) dev &
-	@$(MAKE) schedule &
 	@$(MAKE) reverb &
+	@$(MAKE) dev &
 	@wait
 
 serve:
-	@echo "Starting PHP Artisan Serve..."
+	@echo "Starting Laravel server..."
 	php artisan serve
-
-dev:
-	@echo "Starting NPM Dev Server..."
-	npm run dev
-
-schedule:
-	@echo "Starting Laravel Scheduler..."
-	php artisan schedule:work
 
 reverb:
 	@echo "Starting Laravel Reverb..."
 	php artisan reverb:start
+
+dev:
+	@echo "Starting Vite (npm run dev)..."
+	npm run dev
+
+stop:
+	@echo "Stopping all processes..."
+	@pkill -f "php artisan serve" || true
+	@pkill -f "php artisan reverb:start" || true
+	@pkill -f "vite" || pkill -f "npm run dev" || true
