@@ -4,7 +4,6 @@ import type { Header, SortType } from 'vue3-easy-data-table';
 
 import Vue3EasyDataTable from 'vue3-easy-data-table';
 import Echo from 'laravel-echo';
-import { Button } from '@/components/ui/button';
 
 const echo = new Echo({
     broadcaster: 'reverb',
@@ -31,7 +30,6 @@ onMounted(() => {
     echo.channel(channelName)
         .listen('CurrencyDataUpdated', (event: { currencyData: [] }) => {
             console.log('Currency Data Updated');
-            console.log(event.currencyData);
             currencies.value = event.currencyData;
         });
 });
