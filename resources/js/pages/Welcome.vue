@@ -19,6 +19,7 @@ const currencies = ref([]);
 
 onMounted(() => {
     echo.channel('chat').listen('CurrencyDataUpdated', (event) => {
+        console.log(event);
         currencies.value = event.currencyData;
     });
 });
