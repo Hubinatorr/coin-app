@@ -39,7 +39,8 @@ class FetchCurrencyData extends Command
                 'order' => 'market_cap_desc',
                 'per_page' => 50, // Fetch top 50
                 'page' => 1,
-                'sparkline' => false
+                'sparkline' => false,
+                'price_change_percentage' => '1h,24h,7d'
             ]);
 
             if ($response->successful()) {

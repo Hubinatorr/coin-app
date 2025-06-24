@@ -15,8 +15,11 @@ class CurrencyResource extends JsonResource
             'symbol' => $this['symbol'],
             'icon' => $this['image'],
             'current_price' => $this['current_price'],
-            'percent_change_24h' => $this['price_change_percentage_24h'],
             'market_cap' => $this['market_cap'],
+            'price_change_percentage_1h_in_currency' => $this['price_change_percentage_1h_in_currency'],
+            'price_change_percentage_24h_in_currency' => $this['price_change_percentage_24h_in_currency'],
+            'price_change_percentage_7d_in_currency' => $this['price_change_percentage_7d_in_currency'],
+            'circulating_supply' => $this['circulating_supply'],
         ];
     }
 }
