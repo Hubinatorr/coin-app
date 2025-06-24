@@ -1,26 +1,27 @@
-.PHONY: start serve reverb dev stop
+.PHONY: start
+
+# Define ports
+LARAVEL_PORT=8000
+REVERB_PORT=6001
 
 start:
-	@echo "Starting Laravel server, Reverb, and Vite dev server..."
-	@$(MAKE) serve &
-	@$(MAKE) reverb &
-	@$(MAKE) dev &
-	@wait
+	@echo "🔍 Checking if ports are available..."
+	@if lsof -i tcp:$(LARAVEL_PORT) >/dev/null 2>&1; then \
+		echo "❌ Port $(LARAVEL_PORT) is already in use. Aborting."; exit 1; \
+	else \
+		echo "✅ Port $(LARAVEL_PORT) is free."; \
+	fi
+	@if lsof -i tcp:$(REVERB_PORT) >/dev/null 2>&1; then \
+		echo "⚠️ Port $(REVERB_PORT) is already in use. Reverb may fail."; \
+	else \
+		echo "✅ Port $(REVERB_PORT) is free."; \
+	fi
 
-serve:
-	@echo "Starting Laravel server..."
-	php artisan serve
+	@echo "🚀 Starting Laravel server, Reverb, and Vite (npm run dev)..."
+	@trap 'echo "\n🛑 Stopping all..."; kill 0' SIGINT; \
+	php artisan serve --port=$(LARAVEL_PORT) & \
+	php artisan reverb:start & \
+	php artisan schedule:work & \
+	npm run dev & \
 
-reverb:
-	@echo "Starting Laravel Reverb..."
-	php artisan reverb:start
-
-dev:
-	@echo "Starting Vite (npm run dev)..."
-	npm run dev
-
-stop:
-	@echo "Stopping all processes..."
-	@pkill -f "php artisan serve" || true
-	@pkill -f "php artisan reverb:start" || true
-	@pkill -f "vite" || pkill -f "npm run dev" || true
+	wait
