@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3';;
+import { Head, Link } from '@inertiajs/vue3';
 import { ref } from 'vue';
-import type { BodyRowClassNameFunction, Header, Item, SortType } from 'vue3-easy-data-table';
+import type { Header, Item, SortType } from 'vue3-easy-data-table';
 import { currenciesData } from '@/currencies';
 
 import Vue3EasyDataTable from 'vue3-easy-data-table';
@@ -27,12 +27,12 @@ const currencies = ref(currenciesData);
 // });
 const headers: Header[] = [
     {text: 'Name', value: 'name'},
-    {text: 'Current Price', value: 'current_price' },
-    {text: 'Market Cap', value: 'market_cap' },
-    {text: '1h %', value: 'price_change_percentage_1h_in_currency' },
-    {text: '24h %', value: 'price_change_percentage_24h_in_currency' },
-    {text: '7d %', value: 'price_change_percentage_7d_in_currency' },
-    {text: 'Circulating Supply', value: 'circulating_supply' },
+    {text: 'Current Price', value: 'current_price', sortable: true},
+    {text: 'Market Cap', value: 'market_cap' , sortable: true},
+    {text: '1h %', value: 'price_change_percentage_1h_in_currency', sortable: true},
+    {text: '24h %', value: 'price_change_percentage_24h_in_currency', sortable: true},
+    {text: '7d %', value: 'price_change_percentage_7d_in_currency', sortable: true},
+    {text: 'Circulating Supply', value: 'circulating_supply', sortable: true},
 ]
 
 const items: Item[]= currencies.value.map((item) => {
@@ -44,20 +44,8 @@ const items: Item[]= currencies.value.map((item) => {
 })
 
 
-const sortBy: string[] = [
-    "name",
-    "current_price",
-    "market_cap",
-    "price_change_percentage_1h_in_currency",
-    "price_change_percentage_7d_in_currency",
-    "price_change_percentage_7d_in_currency",
-    "circulating_supply"
-];
-const sortType: SortType[] = ["desc", "asc"];
-
-const bodyRowClassNameFunction: BodyRowClassNameFunction = (): string => {
-    return 'p-2';
-};
+const sortBy: string[] = [];
+const sortType: SortType[] = [];
 
 </script>
 
@@ -72,7 +60,9 @@ const bodyRowClassNameFunction: BodyRowClassNameFunction = (): string => {
             :headers="headers"
             :items="items"
             buttons-pagination
-            :body-row-class-name="bodyRowClassNameFunction"
+            :sort-by="sortBy"
+            :sort-type="sortType"
+            multi-sort
         >
             <template #item-name="{ name, icon }">
                 <div class="flex items-center gap-2">
