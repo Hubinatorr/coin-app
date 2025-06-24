@@ -33,7 +33,7 @@ class FetchCurrencyDataCommand extends Command
         $response = Http::get('https://api.coingecko.com/api/v3/coins/markets', [
             'vs_currency' => 'usd',
             'order' => 'market_cap_desc',
-            'per_page' => 25,
+            'per_page' => 100,
             'page' => 1,
             'sparkline' => false,
             'price_change_percentage' => '1h,24h,7d'
@@ -44,7 +44,7 @@ class FetchCurrencyDataCommand extends Command
             Cache::put('latest_currency_data', $data, now()->addMinutes(5));
 
             $formattedData = CurrencyResource::collection($data)->resolve();
-            Log::info('Successfully fetched and broadcasted currency data.');
+            Log::info('Successfully fetched and broadcast currency data.');
             broadcast(new CurrencyDataUpdated($formattedData));
         } else {
             Log::error('CoinGecko API Error: ' . $response->body());

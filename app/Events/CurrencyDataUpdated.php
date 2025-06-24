@@ -29,7 +29,7 @@ class CurrencyDataUpdated implements ShouldBroadcastNow
     public function broadcastOn(): array
     {
         return [
-            new Channel('chat'),
+            new Channel('currency-updates'),
         ];
     }
 }
