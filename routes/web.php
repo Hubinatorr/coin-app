@@ -36,10 +36,3 @@ Route::get('/currencies-all', function () {
     }
 });
 
-Route::get('/broadcast-currencies', function () {
-    broadcast(new CurrencyDataUpdated([]));
-});
-
-
-require __DIR__.'/settings.php';
-require __DIR__.'/auth.php';
