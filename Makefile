@@ -8,8 +8,7 @@ all: init start
 
 init:
 	@if [ ! -f .env ]; then \
-		cp .env.defaults .env; \
-		vi .env; \
+		cp .env.defaults .env;
 	else \
 		echo ".env file exists, skipping configuration"; \
 	fi
