@@ -4,6 +4,11 @@
 - composer
 - node
 
+## Initial Setup
+In project terminal run:
+
+`make init` to install npm and composer packages
+
 ## Startup
 In project terminal run:
  
