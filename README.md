@@ -32,7 +32,8 @@ query params:
 	 - 1-250
 	 - default: 100
  - page
-	 - page through resultsdefault: 1
+	 - page through results
+     - default: 1
 
 POST `/api/currencies` - sends currency data to websocket server
 
