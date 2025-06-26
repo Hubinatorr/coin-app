@@ -59,7 +59,8 @@ expects array of
 		price_change_percentage_7d_in_currency: number; 
 		circulating_supply: number; 
 	}
-  
+
+Logs can be found in `coin-app/storage/logs/laravel.log`
 
   
 
