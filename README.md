@@ -5,7 +5,7 @@
 - node
 
 ## Startup
-Run:
+In project terminal run:
  
 `php run serve` to start laravel backend
  
