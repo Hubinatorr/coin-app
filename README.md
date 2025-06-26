@@ -18,6 +18,9 @@ In project terminal run:
  
 `npm run dev` to start frontend
 
+`php artisan schedule:work` to schedule periodical fetching and broadcasting of data from api
+
+
 Or:
 `make start`
 
