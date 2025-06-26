@@ -7,14 +7,14 @@ REVERB_PORT=6001
 all: init start
 
 init:
-	npm i &\
-	composer i &\
 	@if [ ! -f .env ]; then \
-	  	cp .env.defaults .env; \
+		cp .env.defaults .env; \
 		vi .env; \
 	else \
-    	echo ".env file exists, skipping configuration"; \
-    fi
+		echo ".env file exists, skipping configuration"; \
+	fi
+	npm i &\
+    composer i &\
 
 start:
 	@echo "🔍 Checking if ports are available..."
