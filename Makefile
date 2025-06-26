@@ -19,9 +19,10 @@ start:
 
 	@echo "🚀 Starting Laravel server, Reverb, and Vite (npm run dev)..."
 	@trap 'echo "\n🛑 Stopping all..."; kill 0' SIGINT; \
-	php artisan serve --port=$(LARAVEL_PORT) & \
-	php artisan reverb:start & \
-	php artisan schedule:work & \
 	npm run dev & \
+	php artisan reverb:start & \
+	php artisan serve --port=$(LARAVEL_PORT) & \
+	php artisan schedule:work & \
+
 
 	wait

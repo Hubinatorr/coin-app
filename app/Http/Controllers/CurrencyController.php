@@ -10,30 +10,27 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Response;
-use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
 class CurrencyController extends Controller
 {
-    public function index(Request $request): JsonResponse
+    public function getCurrencies(Request $request): JsonResponse
     {
+        $rules = [
+            'vs_currency' => 'sometimes|string',
+            'order' => 'sometimes|string',
+            'per_page' => 'sometimes|integer|min:1|max:250',
+            'page' => 'sometimes|integer|min:1'
+        ];
+
+        $messages = [
+            'per_page.integer' => 'The "per_page" parameter must be an integer.',
+            'per_page.min' => 'The "per_page" value must be at least 1.',
+            'per_page.max' => 'The "per_page" value cannot exceed 250.',
+            'page.integer' => 'The "page" parameter must be an integer.',
+            'page.min' => 'The "page" value must be at least 1.',
+        ];
+
         try {
-            $rules = [
-                'vs_currency' => 'sometimes|in:usd,eur,gbp',
-                'order' => 'sometimes|string',
-                'per_page' => 'sometimes|integer|min:1|max:250',
-                'page' => 'sometimes|integer|min:1',
-                'price_change_percentage' => 'sometimes|string',
-            ];
-
-            $messages = [
-                'vs_currency.in' => 'The selected currency for "vs_currency" is invalid. Allowed values are usd, eur, gbp.',
-                'per_page.integer' => 'The "per_page" parameter must be an integer.',
-                'per_page.min' => 'The "per_page" value must be at least 1.',
-                'per_page.max' => 'The "per_page" value cannot exceed 250.',
-                'page.integer' => 'The "page" parameter must be an integer.',
-                'page.min' => 'The "page" value must be at least 1.',
-            ];
-
             $validator = Validator::make($request->all(), $rules, $messages);
 
             if ($validator->fails()) {
@@ -65,7 +62,8 @@ class CurrencyController extends Controller
                 $currencies = $response->json();
                 $currencyData = CurrencyResource::collection(collect($currencies))->resolve();
                 Log::info('Successfully fetched currency data from CoinGecko.');
-                return response()->json($currencyData, ResponseAlias::HTTP_OK);
+
+                return response()->json($currencyData, Response::HTTP_OK);
             } else {
                 Log::error('CoinGecko API Error: ' . $response->body(), [
                     'status' => $response->status(),
@@ -87,11 +85,11 @@ class CurrencyController extends Controller
             return response()->json([
                 'error' => 'An unexpected server error occurred.',
                 'message' => $e->getMessage()
-            ], ResponseAlias::HTTP_INTERNAL_SERVER_ERROR); // HTTP 500
+            ], Response::HTTP_INTERNAL_SERVER_ERROR); // HTTP 500
         }
     }
 
-    public function store(Request $request): JsonResponse
+    public function addCurrencies(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'currencies' => 'required|array',
