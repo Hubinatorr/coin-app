@@ -8,12 +8,12 @@ all: init start
 
 init:
 	@if [ ! -f .env ]; then \
-		cp .env.defaults .env; \
+		cp .env.example .env; \
 	else \
 		echo ".env file exists, skipping configuration"; \
 	fi
 	npm i &\
-    composer i &\
+    composer i;
 
 start:
 	@echo "🔍 Checking if ports are available..."
