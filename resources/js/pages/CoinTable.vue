@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 import type { Header, SortType } from 'vue3-easy-data-table';
-
+import axios from 'axios';
 import Vue3EasyDataTable from 'vue3-easy-data-table';
 import Echo from 'laravel-echo';
 
@@ -22,6 +22,10 @@ const channelName = 'currency-updates';
 const isLoading = computed(() => connectionState.value !== 'connected' && currencies.value.length === 0);
 
 onMounted(() => {
+    axios.get('/api/currencies').then((response) => {
+        currencies.value = response.data;
+    })
+
     echo.connector.pusher.connection.bind('state_change', (states: { previous: string, current: string }) => {
         console.log('Connection state changed from', states.previous, 'to', states.current);
         connectionState.value = states.current;
