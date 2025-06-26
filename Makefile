@@ -1,8 +1,20 @@
-.PHONY: start
+.PHONY: init start
 
 # Define ports
 LARAVEL_PORT=8000
 REVERB_PORT=6001
+
+all: init start
+
+init:
+	npm i &\
+	composer i &\
+	@if [ ! -f .env ]; then \
+	  	cp .env.defaults .env; \
+		vi .env; \
+	else \
+    	echo ".env file exists, skipping configuration"; \
+    fi
 
 start:
 	@echo "🔍 Checking if ports are available..."
@@ -23,6 +35,4 @@ start:
 	php artisan reverb:start & \
 	php artisan serve --port=$(LARAVEL_PORT) & \
 	php artisan schedule:work & \
-
-
 	wait
