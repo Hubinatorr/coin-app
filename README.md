@@ -6,8 +6,11 @@
 
 ## Startup
 Run:
+ 
 `php run serve` to start laravel backend
+ 
 `php artisan reverb:start` to start websocket server
+ 
 `npm run dev` to start frontend
 
 Or:
@@ -16,8 +19,7 @@ Or:
 app should start at http://127.0.0.1:8000
 
 ## Api usage
-GET `/api/currencies` - returns list of crypto currencies 
-
+GET `/api/currencies` - returns list of crypto currencies
 query params:
   - vs_currency 
      - refer to https://docs.coingecko.com/reference/simple-supported-currencies
@@ -30,9 +32,10 @@ query params:
 	 - 1-250
 	 - default: 100
  - page
-	 - page through results, default: 1
+	 - page through resultsdefault: 1
 
 POST `/api/currencies` - sends currency data to websocket server
+
 expects array of 
 
 	{
@@ -48,3 +51,7 @@ expects array of
 		circulating_supply: number; 
 	}
   
+
+  
+
+
