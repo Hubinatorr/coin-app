@@ -5,12 +5,12 @@
 - node
 
 ## Initial Setup
-In project terminal run:
+In project directory terminal run:
 
 `make init` to install npm and composer packages
 
 ## Startup
-In project terminal run:
+In separate terminals run:
  
 `php run serve` to start laravel backend
  
@@ -20,8 +20,8 @@ In project terminal run:
 
 `php artisan schedule:work` to schedule periodical fetching and broadcasting of data from api
 
-
 Or:
+
 `make start`
 
 app should start at http://127.0.0.1:8000
