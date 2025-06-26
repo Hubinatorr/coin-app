@@ -43,7 +43,7 @@ query params:
 	 - page through results
      - default: 1
 
-POST `/api/currencies` - sends currency data to websocket server
+POST `/api/currencies` - sends currency data to websocket server to broadcast
 
 expects array of 
 
