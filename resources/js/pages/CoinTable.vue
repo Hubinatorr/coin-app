@@ -24,6 +24,8 @@ const isLoading = computed(() => connectionState.value !== 'connected' && curren
 onMounted(() => {
     axios.get('/api/currencies').then((response) => {
         currencies.value = response.data;
+    }).catch((error: Error) => {
+        console.log(error);
     })
 
     echo.connector.pusher.connection.bind('state_change', (states: { previous: string, current: string }) => {

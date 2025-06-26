@@ -27,11 +27,12 @@ class CurrencyController extends Controller
             if ($response->successful()) {
                 $currencies = $response->json();
                 $currencyData = CurrencyResource::collection(collect($currencies))->resolve();
-
                 Log::info('Successfully fetched currency data.');
+
                 return response()->json($currencyData);
             } else {
                 Log::error('CoinGecko API Error: ' . $response->body());
+
                 return response()->json([
                     'error' => 'Failed to fetch currency data from CoinGecko.',
                     'details' => $response->body()
@@ -72,11 +73,8 @@ class CurrencyController extends Controller
 
         try {
             $currencies = $request->input('currencies');
-
             $currencyData = CurrencyResource::collection(collect($currencies))->resolve();
-
             broadcast(new CurrencyDataUpdated($currencyData));
-
             return response()->json($currencyData);
         } catch (\Exception $e) {
             Log::error('Currency processing failed: ' . $e->getMessage());

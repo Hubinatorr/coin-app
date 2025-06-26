@@ -42,8 +42,8 @@ class FetchCurrencyDataCommand extends Command
             if ($response->successful()) {
                 $data = $response->json();
                 $formattedData = CurrencyResource::collection($data)->resolve();
-                Log::info('Successfully fetched and broadcasted currency data.');
                 broadcast(new CurrencyDataUpdated($formattedData));
+                Log::info('Successfully fetched and broadcasted currency data.');
             } else {
                 Log::error('CoinGecko API Error: ' . $response->body());
             }
