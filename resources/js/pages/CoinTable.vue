@@ -94,9 +94,9 @@ function getChangePercentClass(value: number): string {
             buttons-pagination
             multi-sort
         >
-            <template #item-name="{ name, icon }">
+            <template #item-name="{ name, image }">
                 <div class="flex items-center gap-3">
-                    <img v-if="icon" :src="icon" alt="logo" class="w-6 h-6 rounded-full" />
+                    <img v-if="image" :src="image" alt="logo" class="w-6 h-6 rounded-full" />
                     <span>{{ name }}</span>
                 </div>
             </template>

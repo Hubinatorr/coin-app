@@ -29,15 +29,16 @@ class FetchCurrencyDataCommand extends Command
      */
     public function handle(): void
     {
+        $params = [
+            'vs_currency' => 'usd',
+            'order' => 'market_cap_desc',
+            'per_page' => 100,
+            'page' => 1,
+            'price_change_percentage' => '1h,24h,7d'
+        ];
+
         try {
-            $response = Http::get('https://api.coingecko.com/api/v3/coins/markets', [
-                'vs_currency' => 'usd',
-                'order' => 'market_cap_desc',
-                'per_page' => 100,
-                'page' => 1,
-                'sparkline' => false,
-                'price_change_percentage' => '1h,24h,7d'
-            ]);
+            $response = Http::get('https://api.coingecko.com/api/v3/coins/markets', $params);
 
             if ($response->successful()) {
                 $data = $response->json();
@@ -45,16 +46,17 @@ class FetchCurrencyDataCommand extends Command
                 broadcast(new CurrencyDataUpdated($formattedData));
                 Log::info('Successfully fetched and broadcasted currency data.');
             } else {
-                Log::error('CoinGecko API Error: ' . $response->body());
+                Log::error('CoinGecko API Error: ' . $response->body(), [
+                    'status' => $response->status(),
+                    'request_params' => $params,
+                    'coingecko_response' => $response->json()
+                ]);
             }
         } catch (\Exception $e) {
-            Log::error('FetchCurrencyData Error: ' . $e->getMessage());
+            Log::error('An unexpected error occurred while fetching currency data: ' . $e->getMessage(), [
+                'exception' => $e,
+                'request_params' => $params
+            ]);
         }
-
-
-
-
-
-
     }
 }

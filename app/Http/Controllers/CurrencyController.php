@@ -9,42 +9,85 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Http\Response;
+use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
 class CurrencyController extends Controller
 {
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         try {
-            $response = Http::get('https://api.coingecko.com/api/v3/coins/markets', [
+            $rules = [
+                'vs_currency' => 'sometimes|in:usd,eur,gbp',
+                'order' => 'sometimes|string',
+                'per_page' => 'sometimes|integer|min:1|max:250',
+                'page' => 'sometimes|integer|min:1',
+                'price_change_percentage' => 'sometimes|string',
+            ];
+
+            $messages = [
+                'vs_currency.in' => 'The selected currency for "vs_currency" is invalid. Allowed values are usd, eur, gbp.',
+                'per_page.integer' => 'The "per_page" parameter must be an integer.',
+                'per_page.min' => 'The "per_page" value must be at least 1.',
+                'per_page.max' => 'The "per_page" value cannot exceed 250.',
+                'page.integer' => 'The "page" parameter must be an integer.',
+                'page.min' => 'The "page" value must be at least 1.',
+            ];
+
+            $validator = Validator::make($request->all(), $rules, $messages);
+
+            if ($validator->fails()) {
+                Log::warning('Validation failed for CoinGecko API request.', [
+                    'errors' => $validator->errors()->all(),
+                    'request_input' => $request->all()
+                ]);
+                return response()->json([
+                    'message' => 'The given data was invalid.',
+                    'errors' => $validator->errors()
+                ], Response::HTTP_UNPROCESSABLE_ENTITY);
+            }
+
+            $validatedQueryParams = $validator->validated();
+
+            $defaultParams = [
                 'vs_currency' => 'usd',
                 'order' => 'market_cap_desc',
                 'per_page' => 100,
                 'page' => 1,
-                'sparkline' => false,
                 'price_change_percentage' => '1h,24h,7d'
-            ]);
+            ];
+
+            $params = array_merge($defaultParams, $validatedQueryParams);
+
+            $response = Http::get('https://api.coingecko.com/api/v3/coins/markets', $params);
 
             if ($response->successful()) {
                 $currencies = $response->json();
                 $currencyData = CurrencyResource::collection(collect($currencies))->resolve();
-                Log::info('Successfully fetched currency data.');
-
-                return response()->json($currencyData);
+                Log::info('Successfully fetched currency data from CoinGecko.');
+                return response()->json($currencyData, ResponseAlias::HTTP_OK);
             } else {
-                Log::error('CoinGecko API Error: ' . $response->body());
+                Log::error('CoinGecko API Error: ' . $response->body(), [
+                    'status' => $response->status(),
+                    'request_params' => $params,
+                    'coingecko_response' => $response->json()
+                ]);
 
                 return response()->json([
                     'error' => 'Failed to fetch currency data from CoinGecko.',
-                    'details' => $response->body()
+                    'details' => $response->json()
                 ], $response->status());
             }
         } catch (\Exception $e) {
-            Log::error('FetchCurrencyData Error: ' . $e->getMessage());
+            Log::error('An unexpected error occurred while fetching currency data: ' . $e->getMessage(), [
+                'exception' => $e,
+                'request_params' => $request->all()
+            ]);
 
             return response()->json([
-                'error' => 'An unexpected error occurred while fetching currency data.',
+                'error' => 'An unexpected server error occurred.',
                 'message' => $e->getMessage()
-            ], 500);
+            ], ResponseAlias::HTTP_INTERNAL_SERVER_ERROR); // HTTP 500
         }
     }
 

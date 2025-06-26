@@ -13,7 +13,7 @@ class CurrencyResource extends JsonResource
             'id' => $this['id'],
             'name' => $this['name'],
             'symbol' => $this['symbol'],
-            'icon' => $this['image'],
+            'image' => $this['image'],
             'current_price' => $this['current_price'],
             'market_cap' => $this['market_cap'],
             'price_change_percentage_1h_in_currency' => $this['price_change_percentage_1h_in_currency'],
